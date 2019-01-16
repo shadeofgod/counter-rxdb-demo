@@ -1,13 +1,17 @@
-import * as React from 'react';
 import compose from 'recompose/compose';
 import lifecycle from 'recompose/lifecycle';
 import withStateHandlers from 'recompose/withStateHandlers';
 import mapProps from 'recompose/mapProps';
 import withHandlers from 'recompose/withHandlers';
 
-import * as Database from './database';
+import getDatabase, { GetDatabase } from './database';
+import { Subscription } from 'rxjs';
 
-const connectDatabase = (queryFn, updateFn) =>
+type QueryFn = (getDatabase: GetDatabase, setState) => Promise<Subscription>;
+
+type UpdateFn = (getDatabase: GetDatabase) => object;
+
+const connectDatabase = (queryFn: QueryFn, updateFn: UpdateFn) =>
   compose(
     withStateHandlers(
       { __dbstate: Object.create(null), },
@@ -15,7 +19,7 @@ const connectDatabase = (queryFn, updateFn) =>
     ),
     lifecycle({
       async componentDidMount() {
-        this.__sub = await queryFn(Database, this.props.__setState);
+        this.__sub = await queryFn(getDatabase, this.props.__setState);
       },
       componentWillUnmount() {
         if (this.__sub) {
@@ -28,7 +32,7 @@ const connectDatabase = (queryFn, updateFn) =>
       ...__dbstate,
     })),
     withHandlers({
-      ...updateFn(Database),
+      ...updateFn(getDatabase),
     }),
   );
 

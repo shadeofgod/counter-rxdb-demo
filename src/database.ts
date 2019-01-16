@@ -1,5 +1,7 @@
 import * as RxDB from 'rxdb';
+
 import counterSchema from './schema';
+import { MyDatabase, CounterDatabaseCollections } from './typings';
 
 RxDB.QueryChangeDetector.enableDebugging();
 RxDB.plugin(require('pouchdb-adapter-idb'));
@@ -16,7 +18,7 @@ let dbPromise = null;
 async function init() {
   console.log('DatabaseService: creating database..');
 
-  const db = await RxDB.create({
+  const db: MyDatabase = await RxDB.create<CounterDatabaseCollections>({
     name: 'counter', // <- name
     adapter: 'idb', // <- storage-adapter
   });
@@ -43,7 +45,9 @@ async function init() {
   return db;
 }
 
-export const get = () => {
+export type GetDatabase = () => MyDatabase;
+
+export default function getDatabase(): MyDatabase {
   if (!dbPromise) {
     dbPromise = init();
   }

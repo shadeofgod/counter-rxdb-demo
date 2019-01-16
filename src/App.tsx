@@ -20,17 +20,17 @@ class App extends React.Component<IAppProps> {
 }
 
 export default connectDatabase(
-  async (database, setState) => {
-    const db = await database.get();
+  async (getDatabase, setState) => {
+    const db = await getDatabase();
     const sub = await db.counter.findOne().$.subscribe(counterDocument => {
       if (!counterDocument) return;
       setState({ counter: counterDocument.get('number') });
     });
     return sub;
   },
-  database => ({
+  getDatabase => ({
     increment: () => async () => {
-      const db = await database.get();
+      const db = await getDatabase();
       db.counter
         .findOne()
         .exec()
