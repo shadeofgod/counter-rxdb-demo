@@ -7,7 +7,7 @@ import withHandlers from 'recompose/withHandlers';
 
 import * as Database from './database';
 
-const connectDatabase = (queryFn, updateFn) => BaseComponent =>
+const connectDatabase = (queryFn, updateFn) =>
   compose(
     withStateHandlers(
       { __dbstate: Object.create(null), },
@@ -30,7 +30,7 @@ const connectDatabase = (queryFn, updateFn) => BaseComponent =>
     withHandlers({
       ...updateFn(Database),
     }),
-  )(BaseComponent);
+  );
 
 
 export default connectDatabase;
