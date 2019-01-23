@@ -1,5 +1,8 @@
 import * as React from 'react';
-import connectDatabase from './connectDatabase';
+import compose from 'recompose/compose';
+import withHandlers from 'recompose/withHandlers';
+import mapDatabaseToProps from './mapDatabaseToProps';
+import getDatabase from './database';
 
 interface IAppProps {
   counter: number;
@@ -18,25 +21,19 @@ class App extends React.Component<IAppProps> {
     );
   }
 }
-
-export default connectDatabase(
-  async (getDatabase, setState) => {
-    const db = await getDatabase();
-    const sub = await db.counter.findOne().$.subscribe(counterDocument => {
-      if (!counterDocument) return;
-      setState({ counter: counterDocument.get('number') });
-    });
-    return sub;
-  },
-  getDatabase => ({
+export default compose(
+  mapDatabaseToProps(async (db) => {
+    const counterDoc = await db.counter.findOne().exec();
+    return {
+      counter: counterDoc.get$('number'),
+    }
+  }),
+  withHandlers({
     increment: () => async () => {
       const db = await getDatabase();
-      db.counter
-        .findOne()
-        .exec()
-        .then(counterDocument => {
-          counterDocument.update({ $inc: { number: 1 } });
-        });
-    },
+      db.counter.findOne().exec().then(counterDocument => {
+        counterDocument.update({ $inc: { number: 1 } });
+      });
+    }
   })
-)(App);
+)(App)

@@ -47,7 +47,7 @@ async function init() {
 
 export type GetDatabase = () => MyDatabase;
 
-export default function getDatabase(): MyDatabase {
+export default function getDatabase() {
   if (!dbPromise) {
     dbPromise = init();
   }
